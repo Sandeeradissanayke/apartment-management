@@ -1,42 +1,37 @@
-
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
-const Apartment = require("./models/Apartment");
+require("dotenv").config({
+    path: path.join(__dirname, ".env")
+});
+
+const connectDB = require("./config/db");
+const apartmentRoutes = require("./routes/apartmentRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((error) => {
-    console.log("MongoDB connection error:", error);
-  });
+// Connect to MongoDB
+connectDB();
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("Apartment Management API is running");
+    res.send("Apartment Management API is running");
 });
 
-// Get all apartments
-app.get("/api/apartments", async (req, res) => {
-  try {
-    const apartments = await Apartment.find();
-    res.json(apartments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// Apartment routes
+app.use("/api/apartments", apartmentRoutes);
 
-const PORT = process.env.PORT || 5001;
+// Error handling middleware
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5002;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

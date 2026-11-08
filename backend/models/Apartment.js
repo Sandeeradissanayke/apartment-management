@@ -5,7 +5,8 @@ const apartmentSchema = new mongoose.Schema({
   apartmentNumber: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    trim: true
   },
 
   bedroomType: {
