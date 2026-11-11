@@ -4,7 +4,9 @@ const router = express.Router();
 const {
     getAllApartments,
     createApartment,
-    getApartmentById
+    getApartmentById,
+    updateApartment,
+    deleteApartment
 } = require("../controllers/apartmentController");
 
 // Get all apartments
@@ -15,5 +17,11 @@ router.post("/", createApartment);
 
 // Get apartment by ID
 router.get("/:id", getApartmentById);
+
+// Update apartment
+router.put("/:id", updateApartment);
+
+// Delete apartment
+router.delete("/:id", deleteApartment);
 
 module.exports = router;
