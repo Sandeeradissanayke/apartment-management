@@ -19,6 +19,16 @@ const apartmentSchema = new mongoose.Schema({
     type: String,
     enum: ["Available", "Booked"],
     default: "Available"
+  },
+
+  bookingFrom: {
+    type: Date,
+    default: null
+  },
+
+  bookingTo: {
+    type: Date,
+    default: null
   }
 
 }, { timestamps: true });

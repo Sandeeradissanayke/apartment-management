@@ -74,6 +74,7 @@ const getApartmentById = async (req, res) => {
     }
 };
 
+
 // Update apartment
 const updateApartment = async (req, res) => {
     try {
@@ -85,36 +86,7 @@ const updateApartment = async (req, res) => {
             });
         }
 
-        const { apartmentNumber, bedroomType, status } = req.body;
-
-        const updateData = {};
-
-        if (apartmentNumber !== undefined) {
-            updateData.apartmentNumber = apartmentNumber;
-        }
-
-        if (bedroomType !== undefined) {
-            updateData.bedroomType = bedroomType;
-        }
-
-        if (status !== undefined) {
-            updateData.status = status;
-        }
-
-        if (Object.keys(updateData).length === 0) {
-            return res.status(400).json({
-                message: "No update data provided"
-            });
-        }
-
-        const apartment = await Apartment.findByIdAndUpdate(
-            id,
-            updateData,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        const apartment = await Apartment.findById(id);
 
         if (!apartment) {
             return res.status(404).json({
@@ -122,9 +94,84 @@ const updateApartment = async (req, res) => {
             });
         }
 
+        const {
+            apartmentNumber,
+            bedroomType,
+            status,
+            bookingFrom,
+            bookingTo
+        } = req.body;
+
+        if (apartmentNumber !== undefined) {
+            apartment.apartmentNumber = apartmentNumber;
+        }
+
+        if (bedroomType !== undefined) {
+            apartment.bedroomType = bedroomType;
+        }
+
+        // Make apartment available
+        if (status === "Available") {
+            apartment.status = "Available";
+            apartment.bookingFrom = null;
+            apartment.bookingTo = null;
+        }
+
+        // Update booking dates
+        else if (
+            status === "Booked" ||
+            bookingFrom !== undefined ||
+            bookingTo !== undefined
+        ) {
+            const fromDate = bookingFrom !== undefined
+                ? new Date(bookingFrom)
+                : apartment.bookingFrom;
+
+            const toDate = bookingTo !== undefined
+                ? new Date(bookingTo)
+                : apartment.bookingTo;
+
+            if (!fromDate || !toDate) {
+                return res.status(400).json({
+                    message: "Both booking dates are required"
+                });
+            }
+
+            if (
+                Number.isNaN(fromDate.getTime()) ||
+                Number.isNaN(toDate.getTime())
+            ) {
+                return res.status(400).json({
+                    message: "Invalid booking dates"
+                });
+            }
+
+            if (fromDate > toDate) {
+                return res.status(400).json({
+                    message: "From date cannot be after To date"
+                });
+            }
+
+            apartment.bookingFrom = fromDate;
+            apartment.bookingTo = toDate;
+            apartment.status = "Booked";
+        }
+
+        else if (status !== undefined) {
+            apartment.status = status;
+        }
+
+        await apartment.save();
+
         res.json(apartment);
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({
+                message: "Apartment number already exists"
+            });
+        }
+
         res.status(500).json({
             message: error.message
         });
