@@ -17,25 +17,58 @@ async function seedApartments() {
       return;
     }
 
-    const apartments = [];
-
-    // Create 7 two-bedroom apartments
-    for (let i = 1; i <= 7; i++) {
-      apartments.push({
-        apartmentNumber: `A0${i}`,
+    const apartments = [
+      {
+        apartmentNumber: "UK Ground Floor 01",
+        bedroomType: "2 Bedroom",
+        status: "Booked"
+      },
+      {
+        apartmentNumber: "UK Ground Floor 02",
+        bedroomType: "2 Bedroom",
+        status: "Booked"
+      },
+      {
+        apartmentNumber: "UK First Floor 01",
+        bedroomType: "2 Bedroom",
+        status: "Booked"
+      },
+      {
+        apartmentNumber: "UK First Floor 02",
         bedroomType: "2 Bedroom",
         status: "Available"
-      });
-    }
-
-    // Create 3 one-bedroom apartments
-    for (let i = 1; i <= 3; i++) {
-      apartments.push({
-        apartmentNumber: `B0${i}`,
+      },
+      {
+        apartmentNumber: "Wattala Ground Floor",
+        bedroomType: "2 Bedroom",
+        status: "Available"
+      },
+      {
+        apartmentNumber: "Wattala First Floor",
+        bedroomType: "2 Bedroom",
+        status: "Booked"
+      },
+      {
+        apartmentNumber: "Wattala Second Floor",
+        bedroomType: "2 Bedroom",
+        status: "Booked"
+      },
+      {
+        apartmentNumber: "Wattala Suite 01",
         bedroomType: "1 Bedroom",
         status: "Available"
-      });
-    }
+      },
+      {
+        apartmentNumber: "Wattala Suite 02",
+        bedroomType: "1 Bedroom",
+        status: "Available"
+      },
+      {
+        apartmentNumber: "Wattala Attick",
+        bedroomType: "1 Bedroom",
+        status: "Available"
+      }
+    ];
 
     await Apartment.insertMany(apartments);
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Home,
@@ -89,25 +89,33 @@ const BlossomBranch = ({ className }) => (
   </svg>
 );
 
+const API_URL = 'http://localhost:5002/api/apartments';
+
 function App() {
-  const [apartments, setApartments] = useState([
-    {
-      id: 1,
-      name: 'UK Ground Floor 01',
-      bedroomType: '2 Bedroom',
-      status: 'Booked',
-      bookingFrom: '-',
-      bookingTo: '-'
-    },
-    {
-      id: 2,
-      name: 'UK Ground Floor 02',
-      bedroomType: '2 Bedroom',
-      status: 'Booked',
-      bookingFrom: '-',
-      bookingTo: '-'
-    }
-  ]);
+  const [apartments, setApartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchApartments = async () => {
+      try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error('Failed to load apartments');
+        }
+
+        const data = await response.json();
+        setApartments(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApartments();
+  }, []);
 
   const [activeMenu, setActiveMenu] = useState('Dashboard');
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,10 +134,10 @@ function App() {
   const bookedCount = apartments.filter((a) => a.status === 'Booked').length;
 
   const filteredApartments = apartments.filter(
-    (apt) =>
-      apt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apt.bedroomType.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  (apt) =>
+    (apt.apartmentNumber || apt.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (apt.bedroomType || '').toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   const handleAddApartment = (e) => {
     e.preventDefault();
@@ -149,13 +157,45 @@ function App() {
     setShowAddForm(false);
   };
 
-  const handleStatusChange = (id, newStatus) => {
-    setApartments(apartments.map((apt) => (apt.id === id ? { ...apt, status: newStatus } : apt)));
-  };
+  const handleStatusChange = async (id, newStatus) => {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
 
-  const handleDelete = (id) => {
-    setApartments(apartments.filter((apt) => apt.id !== id));
-  };
+    if (!response.ok) {
+      throw new Error('Failed to update apartment');
+    }
+
+    const updatedApartment = await response.json();
+
+    setApartments(apartments.map((apt) =>
+      apt._id === id ? updatedApartment : apt
+    ));
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+  const handleDelete = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete apartment');
+    }
+
+    setApartments(apartments.filter((apt) => apt._id !== id));
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   const menuItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
@@ -397,13 +437,13 @@ function App() {
               </thead>
               <tbody>
                 {filteredApartments.map((apt) => (
-                  <tr key={apt.id}>
-                    <td><strong>{apt.name}</strong></td>
+  <tr key={apt._id}>
+                    <td><strong>{apt.apartmentNumber || apt.name}</strong></td>
                     <td>{apt.bedroomType}</td>
                     <td>
-                      <span className={`status ${apt.status.toLowerCase()}`}>
-                        {apt.status}
-                      </span>
+                      <span className={`status ${(apt.status || 'Available').toLowerCase()}`}>
+  {apt.status || 'Available'}
+</span>
                     </td>
                     <td>{apt.bookingFrom}</td>
                     <td>{apt.bookingTo}</td>
@@ -411,14 +451,14 @@ function App() {
                       <div className="actions">
                         <select
                           value={apt.status}
-                          onChange={(e) => handleStatusChange(apt.id, e.target.value)}
+                          onChange={(e) => handleStatusChange(apt._id, e.target.value)}
                         >
                           <option value="Available">Available</option>
                           <option value="Booked">Booked</option>
                         </select>
                         <button
                           className="delete-button"
-                          onClick={() => handleDelete(apt.id)}
+                          onClick={() => handleDelete(apt._id)}
                         >
                           <Trash2 size={13} />
                           <span>Delete</span>
