@@ -122,12 +122,9 @@ function App() {
   const [showAddForm, setShowAddForm] = useState(false);
 
   const [newApt, setNewApt] = useState({
-    name: '',
-    bedroomType: '1 Bedroom',
-    status: 'Available',
-    bookingFrom: '',
-    bookingTo: ''
-  });
+  apartmentNumber: '',
+  bedroomType: '1 Bedroom'
+});
 
   const totalCount = apartments.length;
   const availableCount = apartments.filter((a) => a.status === 'Available').length;
@@ -139,23 +136,42 @@ function App() {
     (apt.bedroomType || '').toLowerCase().includes(searchQuery.toLowerCase())
 );
 
-  const handleAddApartment = (e) => {
-    e.preventDefault();
-    if (!newApt.name.trim()) return;
-    setApartments([
-      ...apartments,
-      {
-        id: Date.now(),
-        name: newApt.name,
-        bedroomType: newApt.bedroomType,
-        status: newApt.status,
-        bookingFrom: newApt.bookingFrom || '-',
-        bookingTo: newApt.bookingTo || '-'
-      }
-    ]);
-    setNewApt({ name: '', bedroomType: '1 Bedroom', status: 'Available', bookingFrom: '', bookingTo: '' });
+  const handleAddApartment = async (e) => {
+  e.preventDefault();
+
+  if (!newApt.apartmentNumber.trim()) return;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        apartmentNumber: newApt.apartmentNumber.trim(),
+        bedroomType: newApt.bedroomType
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to add apartment');
+    }
+
+    setApartments((prev) => [...prev, data]);
+
+    setNewApt({
+      apartmentNumber: '',
+      bedroomType: '1 Bedroom'
+    });
+
     setShowAddForm(false);
-  };
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   const handleStatusChange = async (id, newStatus) => {
   try {
@@ -328,8 +344,11 @@ function App() {
                 <input
                   type="text"
                   placeholder="e.g. UK First Floor 01"
-                  value={newApt.name}
-                  onChange={(e) => setNewApt({ ...newApt, name: e.target.value })}
+                  value={newApt.apartmentNumber}
+onChange={(e) => setNewApt({
+  ...newApt,
+  apartmentNumber: e.target.value
+})}
                   required
                 />
               </div>
