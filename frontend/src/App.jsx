@@ -95,6 +95,7 @@ function App() {
   const [apartments, setApartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [bookingDrafts, setBookingDrafts] = useState({});
 
   useEffect(() => {
     const fetchApartments = async () => {
@@ -174,28 +175,90 @@ function App() {
 };
 
   const handleStatusChange = async (id, newStatus) => {
+  if (newStatus === 'Booked') {
+    setBookingDrafts((prev) => ({
+      ...prev,
+      [id]: { bookingFrom: '', bookingTo: '' }
+    }));
+    return;
+  }
+
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ status: newStatus })
+      body: JSON.stringify({ status: 'Available' })
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error('Failed to update apartment');
+      throw new Error(data.message || 'Failed to update apartment');
     }
 
-    const updatedApartment = await response.json();
+    setApartments((prev) =>
+      prev.map((apt) => apt._id === id ? data : apt)
+    );
 
-    setApartments(apartments.map((apt) =>
-      apt._id === id ? updatedApartment : apt
-    ));
+    setBookingDrafts((prev) => {
+      const updated = { ...prev };
+      delete updated[id];
+      return updated;
+    });
+
   } catch (err) {
     alert(err.message);
   }
 };
+
+const handleBookingSave = async (id) => {
+  const dates = bookingDrafts[id];
+
+  if (!dates?.bookingFrom || !dates?.bookingTo) {
+    alert('Please select both check-in and check-out dates.');
+    return;
+  }
+
+  if (dates.bookingFrom >= dates.bookingTo) {
+    alert('Check-out date must be after check-in date.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        status: 'Booked',
+        bookingFrom: dates.bookingFrom,
+        bookingTo: dates.bookingTo
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to save booking');
+    }
+
+    setApartments((prev) =>
+      prev.map((apt) => apt._id === id ? data : apt)
+    );
+
+    setBookingDrafts((prev) => {
+      const updated = { ...prev };
+      delete updated[id];
+      return updated;
+    });
+
+  } catch (err) {
+    alert(err.message);
+  }
+}; 
 
   const handleDelete = async (id) => {
   try {
@@ -468,21 +531,77 @@ onChange={(e) => setNewApt({
                     <td>{apt.bookingTo}</td>
                     <td>
                       <div className="actions">
-                        <select
-                          value={apt.status}
-                          onChange={(e) => handleStatusChange(apt._id, e.target.value)}
-                        >
-                          <option value="Available">Available</option>
-                          <option value="Booked">Booked</option>
-                        </select>
-                        <button
-                          className="delete-button"
-                          onClick={() => handleDelete(apt._id)}
-                        >
-                          <Trash2 size={13} />
-                          <span>Delete</span>
-                        </button>
-                      </div>
+  <select
+    value={bookingDrafts[apt._id] ? 'Booked' : apt.status}
+    onChange={(e) => handleStatusChange(apt._id, e.target.value)}
+  >
+    <option value="Available">Available</option>
+    <option value="Booked">Booked</option>
+  </select>
+
+  {bookingDrafts[apt._id] && (
+    <div className="booking-inputs">
+      <label>
+        Check-in Date
+        <input
+          type="date"
+          value={bookingDrafts[apt._id].bookingFrom}
+          onChange={(e) =>
+            setBookingDrafts((prev) => ({
+              ...prev,
+              [apt._id]: {
+                ...prev[apt._id],
+                bookingFrom: e.target.value
+              }
+            }))
+          }
+        />
+      </label>
+
+      <label>
+        Check-out Date
+        <input
+          type="date"
+          min={bookingDrafts[apt._id].bookingFrom || undefined}
+          value={bookingDrafts[apt._id].bookingTo}
+          onChange={(e) =>
+            setBookingDrafts((prev) => ({
+              ...prev,
+              [apt._id]: {
+                ...prev[apt._id],
+                bookingTo: e.target.value
+              }
+            }))
+          }
+        />
+      </label>
+
+      <button onClick={() => handleBookingSave(apt._id)}>
+        Confirm Booking
+      </button>
+
+      <button
+        onClick={() =>
+          setBookingDrafts((prev) => {
+            const updated = { ...prev };
+            delete updated[apt._id];
+            return updated;
+          })
+        }
+      >
+        Cancel
+      </button>
+    </div>
+  )}
+
+  <button
+    className="delete-button"
+    onClick={() => handleDelete(apt._id)}
+  >
+    <Trash2 size={13} />
+    <span>Delete</span>
+  </button>
+</div>
                     </td>
                   </tr>
                 ))}
