@@ -812,3 +812,24 @@ tbody tr:has(.booking-inputs) td {
     width: 100%;
   }
 }
+/* Modern Booking Date Badge */
+.booking-date {
+  display: inline-block;
+  padding: 8px 13px;
+  background: linear-gradient(135deg, #fff0f3, #ffe0e6);
+  color: #bd2445;
+  border: 1px solid #ffc4d0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(189, 36, 69, 0.08);
+  transition: all 0.2s ease;
+}
+
+.booking-date:hover {
+  background: #ffdce4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(189, 36, 69, 0.12);
+}

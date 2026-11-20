@@ -14,6 +14,17 @@ import {
 } from 'lucide-react';
 import './App.css';
 
+const formatBookingDate = (date) => {
+  if (!date) return '—';
+
+  return new Date(date).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+};
+
 /* Custom 3D-style Cherry SVG matching the sidebar & footer */
 const CherryGraphic = ({ size = 65 }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
@@ -527,8 +538,16 @@ onChange={(e) => setNewApt({
   {apt.status || 'Available'}
 </span>
                     </td>
-                    <td>{apt.bookingFrom}</td>
-                    <td>{apt.bookingTo}</td>
+                    <td>
+  <span className="booking-date">
+    {formatBookingDate(apt.bookingFrom)}
+  </span>
+</td>
+<td>
+  <span className="booking-date">
+    {formatBookingDate(apt.bookingTo)}
+  </span>
+</td>
                     <td>
                       <div className="actions">
   <select
