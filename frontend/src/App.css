@@ -649,3 +649,166 @@ tbody tr:hover td {
   .stats-grid { grid-template-columns: 1fr; }
   .search-wrapper { width: 100%; }
 }
+
+
+/* =================================
+   MODERN BOOKING FORM
+================================= */
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.actions select {
+  min-width: 120px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #ead0d8;
+  border-radius: 9px;
+  background: #fff;
+  color: #542432;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.actions select:focus {
+  border-color: #a51d40;
+  box-shadow: 0 0 0 3px rgba(165, 29, 64, 0.10);
+}
+
+/* Booking card */
+
+.booking-inputs {
+  flex-basis: 100%;
+  order: 3;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  margin-top: 8px;
+  background: linear-gradient(135deg, #fff7f9, #fff0f4);
+  border: 1px solid #f1d4dd;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(109, 16, 38, 0.06);
+  animation: bookingAppear 0.25s ease;
+}
+
+@keyframes bookingAppear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Date labels */
+
+.booking-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #70243a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Date fields */
+
+.booking-inputs input[type="date"] {
+  width: 100%;
+  height: 43px;
+  padding: 0 10px;
+  border: 1px solid #e8cbd4;
+  border-radius: 8px;
+  background: #fff;
+  color: #493039;
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: 0.2s ease;
+  cursor: pointer;
+}
+
+.booking-inputs input[type="date"]:hover {
+  border-color: #c77b91;
+}
+
+.booking-inputs input[type="date"]:focus {
+  border-color: #a51d40;
+  box-shadow: 0 0 0 3px rgba(165, 29, 64, 0.10);
+}
+
+/* Booking action buttons */
+
+.booking-inputs button {
+  min-height: 39px;
+  padding: 0 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.booking-inputs button:first-of-type {
+  background: linear-gradient(135deg, #a51d40, #74132e);
+  border: 1px solid #a51d40;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(165, 29, 64, 0.16);
+}
+
+.booking-inputs button:first-of-type:hover {
+  background: #7d1531;
+  transform: translateY(-1px);
+}
+
+.booking-inputs button:last-of-type {
+  background: #fff;
+  border: 1px solid #e7c5cf;
+  color: #84233e;
+}
+
+.booking-inputs button:last-of-type:hover {
+  background: #fce4ea;
+}
+
+/* Delete button alignment */
+
+.actions > .delete-button {
+  order: 2;
+  white-space: nowrap;
+}
+
+/* Highlight row while booking */
+
+tbody tr:has(.booking-inputs) td {
+  background: #fff8fa;
+  vertical-align: middle;
+}
+
+/* Responsive booking form */
+
+@media (max-width: 900px) {
+  .booking-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-inputs {
+    padding: 12px;
+  }
+
+  .booking-inputs button {
+    width: 100%;
+  }
+}
