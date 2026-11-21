@@ -102,6 +102,25 @@ const BlossomBranch = ({ className }) => (
 
 const API_URL = 'http://localhost:5002/api/apartments';
 
+const sampleApartmentDetails = [
+  {
+    image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0',
+    description: 'A beautifully designed apartment with a spacious living area, comfortable furniture and a relaxing atmosphere.'
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c',
+    description: 'A modern apartment featuring elegant interiors, natural lighting and a peaceful environment.'
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d',
+    description: 'A stylish residential space with modern facilities, beautiful interiors and a comfortable living experience.'
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea',
+    description: 'A welcoming apartment designed for comfort, relaxation and an enjoyable stay.'
+  }
+];
+
 function App() {
   const [apartments, setApartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,6 +149,7 @@ function App() {
   }, []);
 
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [selectedApartment, setSelectedApartment] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -407,8 +427,53 @@ const handleBookingSave = async (id) => {
           </button>
         </header>
 
+        {activeMenu === 'Apartments' && (
+  <section className="apartment-gallery">
+    <div className="gallery-heading">
+      <div>
+        <h2>Our Apartments</h2>
+        <p>Explore our beautiful apartments at Cherry Land</p>
+      </div>
+      <span className="gallery-count">
+        {apartments.length} Apartments
+      </span>
+    </div>
+
+    <div className="apartment-gallery-grid">
+      {apartments.map((apt, index) => {
+        const details = sampleApartmentDetails[
+          index % sampleApartmentDetails.length
+        ];
+
+        return (
+          <div className="gallery-card" key={apt._id}>
+            <img
+              src={details.image}
+              alt={apt.apartmentNumber}
+            />
+
+            <div className="gallery-card-content">
+              <span className="gallery-bedroom">
+                {apt.bedroomType}
+              </span>
+
+              <h3>{apt.apartmentNumber}</h3>
+
+              <p>{details.description}</p>
+
+              <span className={`status ${(apt.status || 'Available').toLowerCase()}`}>
+                {apt.status || 'Available'}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+)}
+
         {/* COLLAPSIBLE ADD FORM */}
-        {showAddForm && (
+        {activeMenu === 'Dashboard' && showAddForm && (
           <section className="form-card">
             <h2>Add New Apartment</h2>
             <p>Enter apartment details to register it in Cherry Land.</p>
@@ -454,6 +519,9 @@ onChange={(e) => setNewApt({
             </form>
           </section>
         )}
+
+        {activeMenu === 'Dashboard' && (
+        
 
         {/* STATISTICS CARDS */}
         <section className="stats-grid">
@@ -627,7 +695,10 @@ onChange={(e) => setNewApt({
               </tbody>
             </table>
           </div>
+          
         </section>
+        )}
+        
 
         {/* BOTTOM BRAND WATERMARK */}
         <footer className="dashboard-footer">
